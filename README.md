@@ -12,17 +12,19 @@ This will download everything into a DWMR folder
 
 Before being able to submit changes, make a github account and run:
 <br />
-git config --global user.email "<email address\>"
+git config --global user.email "your email address"
 <br />
-git config --global user.name "<your name\>"
+git config --global user.name "your name"
 
 To record changes:
 ------------------
-git add <files, use * for all\>
+git add file1, file2, ...
+<br />
+Use wildcards like * for all files
 
 To commit changes:
 ------------------
-git commit -m '<Description of the changes\>' 
+git commit -m 'Description of the changes' 
 
 To submit changes to repository:
 --------------------------------
