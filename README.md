@@ -18,7 +18,7 @@ git config --global user.name "your name"
 
 To record changes:
 ------------------
-git add file1, file2, ...
+git add file1 file2 ...
 <br />
 Use wildcards like * for all files
 
