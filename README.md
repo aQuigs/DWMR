@@ -22,6 +22,10 @@ git add file1 file2 ...
 <br />
 Use wildcards like * for all files
 
+To view recorded/unrecorded changes:
+-------------------------
+git status
+
 To commit changes:
 ------------------
 git commit -m 'Description of the changes' 
