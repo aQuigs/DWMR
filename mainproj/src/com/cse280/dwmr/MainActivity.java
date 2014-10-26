@@ -38,6 +38,7 @@ public class MainActivity extends ActionBarActivity
             {
                 SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
                 e.putString("VALUE", input.getText().toString());
+                input.setText("");
                 e.commit();
             }
         });
