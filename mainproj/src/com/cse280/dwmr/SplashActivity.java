@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 
-public class SplashActivity extends ActionBarActivity
+public class SplashActivity extends FullscreenActivity
 {
     @Override
     protected void onCreate(Bundle savedInstanceState)

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
@@ -114,6 +113,7 @@ public class MainActivity extends ActionBarActivity
                     {
                         imgView.setImageBitmap(bm);
                         imgView.setPadding(5, 5, 5, 5);
+                        imgView.setOnClickListener(new ImageListener(bm));
                         imageLayout.addView(imgView);
                     }
                 }
@@ -142,5 +142,22 @@ public class MainActivity extends ActionBarActivity
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    public class ImageListener implements OnClickListener
+    {
+        Bitmap mBitmap;
+        public ImageListener(Bitmap b)
+        {
+            mBitmap = b;
+        }
+        
+        @Override
+        public void onClick(View v)
+        {
+            Intent i = new Intent(v.getContext(), PictureActivity.class);
+            i.putExtra("pic", mBitmap);
+            startActivity(i);
+        }
     }
 }
