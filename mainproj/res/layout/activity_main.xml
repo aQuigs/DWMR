@@ -10,7 +10,7 @@
 
     <EditText
         android:id="@+id/etTemp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
@@ -21,26 +21,42 @@
 
     <Button
         android:id="@+id/btStore"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/etTemp"
+        android:layout_below="@id/etTemp"
         android:text="Store" />
 
     <Button
         android:id="@+id/btRetrieve"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/btStore"
-        android:layout_below="@+id/btStore"
+        android:layout_alignLeft="@id/btStore"
+        android:layout_below="@id/btStore"
         android:text="Retrieve" />
 
-    <TextView
-        android:id="@+id/tvOut"
+    <Button
+        android:id="@+id/btTakePic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/btRetrieve"
         android:layout_below="@+id/btRetrieve"
+        android:text="Take Picture" />
+    
+    <TextView
+        android:id="@+id/tvOut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btTakePic"
         android:text="" />
+
+    <LinearLayout
+        android:id="@+id/imageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/tvOut"
+        android:orientation="horizontal" >
+    </LinearLayout>
 
 </RelativeLayout>
