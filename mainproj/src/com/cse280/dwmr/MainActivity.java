@@ -22,8 +22,6 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity
 {
-    TextView     output;
-    EditText     input;
     LinearLayout imageLayout;
 
     @Override
@@ -31,34 +29,41 @@ public class MainActivity extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        output = (TextView) findViewById(R.id.tvOut);
-        input = (EditText) findViewById(R.id.etTemp);
-        Button send = (Button) findViewById(R.id.btStore);
-        Button get = (Button) findViewById(R.id.btRetrieve);
+        Button setloc = (Button) findViewById(R.id.btSetLoc);
+        Button notes = (Button) findViewById(R.id.btNotes);
+        Button findcar = (Button) findViewById(R.id.btFindCar);
         Button pic = (Button) findViewById(R.id.btTakePic);
         imageLayout = (LinearLayout) findViewById(R.id.imageLayout);
 
-        send.setOnClickListener(new OnClickListener()
+        setloc.setOnClickListener(new OnClickListener()
         {
-
             @Override
             public void onClick(View v)
             {
                 SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
-                e.putString("VALUE", input.getText().toString());
-                input.setText("");
+                // TODO get the longitude and laittude
+                // float latitude =
+                // float longitude =
+                // e.putFloat("latitude", latitude);
+                // e.putFloat("longitude", longitude);
                 e.commit();
             }
         });
 
-        get.setOnClickListener(new OnClickListener()
+        findcar.setOnClickListener(new OnClickListener()
         {
-
             @Override
             public void onClick(View v)
             {
-                output.setText(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("VALUE",
-                        "NOTHING"));
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                if (sp.contains("longitude") && sp.contains("latitude"))
+                {
+                    float latitude = sp.getFloat("latitude", 0.0f);
+                    float longitude = sp.getFloat("longitude", 0.0f);
+                    // TODO: send it to the map
+                }
+                else
+                    Toast.makeText(v.getContext(), "No location stored", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -72,23 +77,12 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
-        input.addTextChangedListener(new TextWatcher()
+        notes.setOnClickListener(new OnClickListener()
         {
-
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
+            public void onClick(View v)
             {
-                output.setText("");
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after)
-            {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
+                // TODO start note taking activity
             }
         });
     }
@@ -96,7 +90,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent i)
     {
-
         switch (requestCode)
         {
             case Constants.TAKE_PICTURE:
@@ -143,15 +136,16 @@ public class MainActivity extends ActionBarActivity
         }
         return super.onOptionsItemSelected(item);
     }
-    
+
     public class ImageListener implements OnClickListener
     {
         Bitmap mBitmap;
+
         public ImageListener(Bitmap b)
         {
             mBitmap = b;
         }
-        
+
         @Override
         public void onClick(View v)
         {
