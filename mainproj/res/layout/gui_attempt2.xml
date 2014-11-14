@@ -2,15 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
+    android:baselineAligned="false"
+    android:orientation="vertical"
     android:weightSum="100" >
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_weight="20"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content" >
+        android:layout_weight="95"
+        android:orientation="horizontal" >
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_weight="5"
+        android:orientation="horizontal" >
 
         <Button
             android:id="@+id/Button02"
@@ -24,7 +39,7 @@
         <Button
             android:id="@+id/Button01"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom"
             android:layout_weight="1"
             android:text="Camera"
@@ -33,7 +48,7 @@
         <Button
             android:id="@+id/button2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom"
             android:layout_weight="1"
             android:text="Where&apos;s My Ride?"
@@ -42,7 +57,7 @@
         <Button
             android:id="@+id/button1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom"
             android:layout_weight="1"
             android:text="Notes"
