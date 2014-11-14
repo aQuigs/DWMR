@@ -83,6 +83,7 @@ public class MainActivity extends ActionBarActivity
             public void onClick(View v)
             {
                 // TODO start note taking activity
+                startActivity(new Intent(MainActivity.this, NoteActivity.class));
             }
         });
     }

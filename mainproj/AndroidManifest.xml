@@ -38,6 +38,11 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAuQLgpJcC4hGebeGTErKiAhA3MLCh9t-Q" />
+
+        <activity
+            android:name=".NoteActivity"
+            android:label="@string/title_activity_note" >
+        </activity>
     </application>
 
     <permission
