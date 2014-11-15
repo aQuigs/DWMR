@@ -55,8 +55,7 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
             @Override
             public void onClick(View v)
             {
-                addTab(mSectionsPagerAdapter.count);
-                mViewPager.setCurrentItem(mSectionsPagerAdapter.count++);
+                addTab();
             }
         });
 
@@ -71,16 +70,17 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
                     Toast.makeText(NoteActivity.this, "Cannot delete last note", Toast.LENGTH_LONG).show();
             }
         });
-
-        addTab(mSectionsPagerAdapter.count++);
+        addTab();
     }
-    
-    private void addTab(int pos)
+
+    private void addTab()
     {
         final ActionBar ab = getSupportActionBar();
-        Tab newtab = ab.newTab().setText(mSectionsPagerAdapter.getPageTitle(pos)).setTabListener(this);
+        Tab newtab = ab.newTab().setText(mSectionsPagerAdapter.getPageTitle(mSectionsPagerAdapter.count++))
+                .setTabListener(this);
         ab.addTab(newtab);
-        ab.selectTab(newtab);
+        mSectionsPagerAdapter.notifyDataSetChanged();
+        mViewPager.setCurrentItem(newtab.getPosition());
         mViewPager.invalidate();
     }
 
@@ -89,12 +89,12 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         final ActionBar ab = getSupportActionBar();
         ab.removeTab(ab.getSelectedTab());
         --mSectionsPagerAdapter.count;
+        mSectionsPagerAdapter.notifyDataSetChanged();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.note, menu);
         return true;
     }
@@ -102,9 +102,6 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings)
         {
@@ -131,8 +128,9 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter
     {
-        public int count;
+        public int  count;
         private int nextName;
+
         public SectionsPagerAdapter(FragmentManager fm)
         {
             super(fm);
@@ -143,15 +141,13 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public Fragment getItem(int position)
         {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override
         public int getCount()
         {
-            return 3;
+            return count;
         }
 
         @Override
