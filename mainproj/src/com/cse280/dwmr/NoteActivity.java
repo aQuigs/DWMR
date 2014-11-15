@@ -155,6 +155,17 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         {
             return "Note " + (nextName++);
         }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object)
+        {
+            // TODO Auto-generated method stub
+            super.destroyItem(container, position, object);
+            FragmentManager manager = ((Fragment) object).getFragmentManager();
+            FragmentTransaction trans = manager.beginTransaction();
+            trans.remove((Fragment) object);
+            trans.commit();
+        }
     }
 
     public static class PlaceholderFragment extends Fragment
@@ -181,5 +192,4 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
             return rootView;
         }
     }
-
 }
