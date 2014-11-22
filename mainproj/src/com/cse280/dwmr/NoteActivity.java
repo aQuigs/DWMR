@@ -2,8 +2,12 @@ package com.cse280.dwmr;
 
 import java.util.ArrayList;
 
+import com.google.android.gms.internal.cn;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -38,6 +42,7 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         setContentView(R.layout.activity_note);
 
         Button add = (Button) findViewById(R.id.btAddNote);
+        Button sav = (Button) findViewById(R.id.btSaveNotes);
         Button del = (Button) findViewById(R.id.btDeleteNote);
 
         ab = getSupportActionBar();
@@ -62,7 +67,16 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
             @Override
             public void onClick(View v)
             {
-                addTab();
+                addTab(1);
+            }
+        });
+
+        sav.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                saveNotes();
             }
         });
 
@@ -78,17 +92,59 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
             }
         });
 
-        addTab();
+        // addTab(1);
+        loadAndPopulateNotes();
     }
 
-    private void addTab()
+    private void loadAndPopulateNotes()
     {
-        final ActionBar ab = getSupportActionBar();
-        Tab newtab = ab.newTab().setText(mSectionsPagerAdapter.getPageTitle(mSectionsPagerAdapter.count++))
-                .setTabListener(this);
-        ab.addTab(newtab);
+        SharedPreferences sp = getSharedPreferences(Constants.NOTE_PREF, MODE_PRIVATE);
+        int num_notes = sp.getInt(Constants.NUM_NOTES_KEY, 1);
+
+        addTab(num_notes);
+
+        for (int i = 0; i < num_notes; ++i)
+        {
+            String note_text = sp.getString(Constants.NOTE_CONTENT_PREFIX + i, "");
+            NoteFragment nf = (NoteFragment) mSectionsPagerAdapter.getItem(i);
+            Bundle textBundle = new Bundle();
+            textBundle.putString(Constants.DEFAULT_TEXT, note_text);
+            nf.setArguments(textBundle);
+        }
+    }
+
+    private void saveNotes()
+    {
+        ArrayList<String> notes = getNoteTexts(null);
+        SharedPreferences.Editor sp = getSharedPreferences(Constants.NOTE_PREF, MODE_PRIVATE).edit();
+        sp.clear();
+        sp.putInt(Constants.NUM_NOTES_KEY, notes.size());
+
+        for (int i = 0; i < notes.size(); ++i)
+        {
+            sp.putString(Constants.NOTE_CONTENT_PREFIX + i, notes.get(i));
+        }
+
+        Toast.makeText(NoteActivity.this, "Notes Saved", Toast.LENGTH_SHORT).show();
+        sp.commit();
+        finish();
+    }
+
+    private void addTab(int amount)
+    {
+        Tab newtab = null;
+        for (int i = 0; i < amount; ++i)
+        {
+            newtab = ab.newTab().setText(mSectionsPagerAdapter.getPageTitle(mSectionsPagerAdapter.count++))
+                    .setTabListener(this);
+            ab.addTab(newtab);
+        }
+
+        // to handle cache issues leading to nullptr exceptions
         mSectionsPagerAdapter.notifyDataSetChanged();
-        mViewPager.setCurrentItem(newtab.getPosition());
+        mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.count);
+        if (newtab != null)
+            mViewPager.setCurrentItem(newtab.getPosition());
         mViewPager.invalidate();
     }
 
@@ -149,19 +205,6 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         }
 
         return notes;
-    }
-
-    private void restoreNoteTexts(ArrayList<String> notes)
-    {
-        for (int i = 0; i < notes.size(); ++i)
-        {
-            frags.get(i).getEditText().setText(notes.get(i));
-        }
-
-        for (int i = notes.size(); i < frags.size(); ++i)
-        {
-            frags.get(i).getEditText().setText("");
-        }
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter
@@ -225,7 +268,8 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
     {
         public EditText getEditText()
         {
-            return (EditText) getView().findViewById(R.id.etNote1);
+            View v = getView();
+            return (v == null) ? null : (EditText) v.findViewById(R.id.etNote1);
         }
 
         public NoteFragment()
@@ -236,6 +280,14 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             View rootView = inflater.inflate(R.layout.fragment_note, container, false);
+
+            Bundle args = getArguments();
+            if (args != null)
+            {
+                String def = args.getString(Constants.DEFAULT_TEXT);
+                ((EditText) rootView.findViewById(R.id.etNote1)).setText((def == null) ? "" : def);
+            }
+
             return rootView;
         }
     }
