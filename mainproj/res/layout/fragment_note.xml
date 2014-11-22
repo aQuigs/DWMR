@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.cse280.dwmr.NoteActivity$PlaceholderFragment" >
+    tools:context="com.cse280.dwmr.NoteFragment" >
 
     <EditText
         android:id="@+id/etNote1"

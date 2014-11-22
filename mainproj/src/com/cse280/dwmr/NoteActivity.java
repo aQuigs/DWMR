@@ -1,6 +1,10 @@
 package com.cse280.dwmr;
 
+import java.util.ArrayList;
+
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -9,6 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBar.Tab;
 import android.support.v7.app.ActionBarActivity;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,13 +21,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class NoteActivity extends ActionBarActivity implements ActionBar.TabListener
 {
-    SectionsPagerAdapter mSectionsPagerAdapter;
-    ViewPager            mViewPager;
-    ActionBar            ab;
+    SectionsPagerAdapter    mSectionsPagerAdapter;
+    ViewPager               mViewPager;
+    ActionBar               ab;
+    ArrayList<NoteFragment> frags = new ArrayList<NoteFragment>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -70,6 +77,7 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
                     Toast.makeText(NoteActivity.this, "Cannot delete last note", Toast.LENGTH_LONG).show();
             }
         });
+
         addTab();
     }
 
@@ -86,10 +94,12 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
 
     private void deleteCurrentTab()
     {
-        final ActionBar ab = getSupportActionBar();
-        ab.removeTab(ab.getSelectedTab());
+        int index = mViewPager.getCurrentItem();
+        getSupportActionBar().removeTab(ab.getSelectedTab());
+        frags.remove(index);
         --mSectionsPagerAdapter.count;
         mSectionsPagerAdapter.notifyDataSetChanged();
+        mViewPager.invalidate();
     }
 
     @Override
@@ -107,6 +117,7 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         {
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -126,6 +137,33 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
     {
     }
 
+    private ArrayList<String> getNoteTexts(Integer skip)
+    {
+        ArrayList<String> notes = new ArrayList<String>(frags.size());
+        for (int i = 0; i < frags.size(); ++i)
+        {
+            if (skip == null || skip.intValue() != i)
+            {
+                notes.add(frags.get(i).getEditText().getText().toString());
+            }
+        }
+
+        return notes;
+    }
+
+    private void restoreNoteTexts(ArrayList<String> notes)
+    {
+        for (int i = 0; i < notes.size(); ++i)
+        {
+            frags.get(i).getEditText().setText(notes.get(i));
+        }
+
+        for (int i = notes.size(); i < frags.size(); ++i)
+        {
+            frags.get(i).getEditText().setText("");
+        }
+    }
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter
     {
         public int  count;
@@ -141,7 +179,33 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public Fragment getItem(int position)
         {
-            return PlaceholderFragment.newInstance(position + 1);
+            if (position < frags.size())
+                return frags.get(position);
+
+            NoteFragment fragment = new NoteFragment();
+            frags.add(fragment);
+            return fragment;
+        }
+
+        @Override
+        public long getItemId(int position)
+        {
+            return getItem(position).hashCode();
+        }
+
+        @Override
+        public int getItemPosition(Object object)
+        {
+            NoteFragment nf = (NoteFragment) object;
+            for (int i = 0; i < frags.size(); i++)
+            {
+                if (frags.get(i) == nf)
+                {
+                    return i;
+                }
+            }
+
+            return POSITION_NONE;
         }
 
         @Override
@@ -155,33 +219,16 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
         {
             return "Note " + (nextName++);
         }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object)
-        {
-            // TODO Auto-generated method stub
-            super.destroyItem(container, position, object);
-            FragmentManager manager = ((Fragment) object).getFragmentManager();
-            FragmentTransaction trans = manager.beginTransaction();
-            trans.remove((Fragment) object);
-            trans.commit();
-        }
     }
 
-    public static class PlaceholderFragment extends Fragment
+    public class NoteFragment extends Fragment
     {
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public static PlaceholderFragment newInstance(int sectionNumber)
+        public EditText getEditText()
         {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
+            return (EditText) getView().findViewById(R.id.etNote1);
         }
 
-        public PlaceholderFragment()
+        public NoteFragment()
         {
         }
 
