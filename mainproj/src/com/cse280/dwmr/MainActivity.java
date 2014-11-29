@@ -3,6 +3,7 @@ package com.cse280.dwmr;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -54,9 +55,18 @@ public class MainActivity extends ActionBarActivity
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                 if (sp.contains("longitude") && sp.contains("latitude"))
                 {
+                    // provide default for legacy purposes (allows support for
+                    // older versions of android) even though it will never be
+                    // used
                     float latitude = sp.getFloat("latitude", 0.0f);
                     float longitude = sp.getFloat("longitude", 0.0f);
-                    // TODO: send it to the map
+                    String format = "google.navigation:q=" + latitude + "," + longitude;
+
+                    Uri uri = Uri.parse(format);
+
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
                 }
                 else
                     Toast.makeText(v.getContext(), "No location stored", Toast.LENGTH_SHORT).show();
@@ -78,7 +88,6 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onClick(View v)
             {
-                // TODO start note taking activity
                 startActivity(new Intent(MainActivity.this, NoteActivity.class));
             }
         });
