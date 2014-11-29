@@ -23,7 +23,7 @@
         <Button
             android:id="@+id/btDeleteNote"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="left|bottom"
             android:layout_weight="1"
             android:text="Delete This Note" />
@@ -31,7 +31,7 @@
         <Button
             android:id="@+id/btSaveNotes"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_weight="1"
             android:text="Save Notes" />
@@ -39,7 +39,7 @@
         <Button
             android:id="@+id/btAddNote"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="right|bottom"
             android:layout_weight="1"
             android:text="Add A Note" />
