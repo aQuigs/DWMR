@@ -1,5 +1,7 @@
 package com.cse280.dwmr;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -292,11 +294,36 @@ public class MainActivity extends ActionBarActivity
 
     public class DWMRClickListener implements OnMapLongClickListener
     {
+        private LatLng clickLoc;
+
         @Override
         public void onMapLongClick(LatLng pos)
         {
-            setRidePos((float) pos.latitude, (float) pos.longitude);
-            Toast.makeText(MainActivity.this, "Stored custom ride location", Toast.LENGTH_LONG).show();
+            clickLoc = pos;
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+            alertDialog.setTitle("Store Custom Ride Location");
+            alertDialog.setMessage("Would you like to select this as the location of your ride?");
+
+            alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+            {
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    setRidePos((float) DWMRClickListener.this.clickLoc.latitude,
+                            (float) DWMRClickListener.this.clickLoc.longitude);
+                    Toast.makeText(MainActivity.this, "Stored custom ride location", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener()
+            {
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    dialog.cancel();
+                }
+            });
+
+            alertDialog.show();
         }
     }
 }
