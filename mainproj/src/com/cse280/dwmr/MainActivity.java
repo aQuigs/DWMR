@@ -3,6 +3,7 @@ package com.cse280.dwmr;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 public class MainActivity extends ActionBarActivity
 {
     LinearLayout imageLayout;
+    GPSTracker   gps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -31,19 +33,27 @@ public class MainActivity extends ActionBarActivity
         Button findcar = (Button) findViewById(R.id.btFindCar);
         Button pic = (Button) findViewById(R.id.btTakePic);
         imageLayout = (LinearLayout) findViewById(R.id.imageLayout);
+        gps = new GPSTracker(this);
 
         setloc.setOnClickListener(new OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
-                // TODO get the longitude and laittude
-                // float latitude =
-                // float longitude =
-                // e.putFloat("latitude", latitude);
-                // e.putFloat("longitude", longitude);
-                e.commit();
+                Location loc = gps.getLocation();
+                if (loc == null)
+                    gps.showSettingsAlert();
+                else
+                {
+                    SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+                            .edit();
+                    float latitude = (float) loc.getLatitude();
+                    float longitude = (float) loc.getLongitude();
+                    e.putFloat("latitude", latitude);
+                    e.putFloat("longitude", longitude);
+                    e.commit();
+                    Toast.makeText(v.getContext(), "Location stored", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -60,7 +70,7 @@ public class MainActivity extends ActionBarActivity
                     // used
                     float latitude = sp.getFloat("latitude", 0.0f);
                     float longitude = sp.getFloat("longitude", 0.0f);
-                    String format = "google.navigation:q=" + latitude + "," + longitude;
+                    String format = "google.navigation:q=" + latitude + "," + longitude + "&mode=w";
 
                     Uri uri = Uri.parse(format);
 
@@ -122,10 +132,14 @@ public class MainActivity extends ActionBarActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        // TODO implement this
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        gps.stopUsingGPS();
     }
 
     @Override
