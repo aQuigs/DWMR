@@ -2,6 +2,7 @@ package com.cse280.dwmr;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -20,7 +21,9 @@ public class PictureActivity extends FullscreenActivity
         }
         else
         {
-            Bitmap b = (Bitmap) i.getExtras().get("pic");
+            String path = i.getExtras().getString("pic");
+            Bitmap b = BitmapFactory.decodeFile(path, new BitmapFactory.Options());
+
             if (b == null)
             {
                 problemLoading("Bitmap was null for PictureActivity");

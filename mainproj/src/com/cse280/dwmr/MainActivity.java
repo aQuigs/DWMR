@@ -1,18 +1,22 @@
 package com.cse280.dwmr;
 
+import java.io.File;
+import java.io.IOException;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -118,7 +122,12 @@ public class MainActivity extends ActionBarActivity
             public void onClick(View v)
             {
                 Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(i, Constants.TAKE_PICTURE);
+                File f = getImageFileName();
+                if (f != null)
+                {
+                    i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+                    startActivityForResult(i, Constants.TAKE_PICTURE);
+                }
             }
         });
 
@@ -136,11 +145,18 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onClick(View v)
             {
-                // remove markers, images, ride location, and notes
+                // remove markers, images, ride location, notes, and images
                 map.clear();
                 imageLayout.removeAllViews();
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().clear().commit();
                 getSharedPreferences(Constants.NOTE_PREF, MODE_PRIVATE).edit().clear().commit();
+                
+                File storageDir = getStorageDirectory();
+                String[] contents = storageDir.list();
+                for (String s : contents)
+                    new File(storageDir, s).delete();
+                storageDir.delete();
+                
                 Toast.makeText(MainActivity.this, "Ride location data was cleared", Toast.LENGTH_SHORT).show();
             }
         });
@@ -161,6 +177,22 @@ public class MainActivity extends ActionBarActivity
     {
         return sp.contains("longitude") && sp.contains("latitude");
     }
+    
+    private File getStorageDirectory()
+    {
+        File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/DWMR");
+
+        if (!dir.exists())
+            dir.mkdir();
+        
+        return dir;
+    }
+
+    private File getImageFileName()
+    {
+        String imageFileName = "RIDE_IMAGE_" + (imageLayout.getChildCount() + 1) + ".jpg";
+        return new File(getStorageDirectory(), imageFileName);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent i)
@@ -170,8 +202,24 @@ public class MainActivity extends ActionBarActivity
             case Constants.TAKE_PICTURE:
                 if (resultCode == RESULT_OK)
                 {
-                    ImageView imgView = new ImageView(this);
-                    Bitmap bm = (Bitmap) i.getExtras().get("data");
+                    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                    bmOptions.inJustDecodeBounds = true;
+                    
+                    String photoPath = getImageFileName().getAbsolutePath();
+                    
+                    BitmapFactory.decodeFile(photoPath, bmOptions);
+
+                    int w = bmOptions.outWidth;
+                    int h = bmOptions.outHeight;
+
+                    int scale = Math.min(w, h) / 150;
+
+                    bmOptions.inJustDecodeBounds = false;
+                    bmOptions.inSampleSize = scale;
+                    bmOptions.inPurgeable = true;
+
+                    Bitmap bm = BitmapFactory.decodeFile(photoPath, bmOptions);
+
                     if (bm == null)
                     {
                         Toast.makeText(this, "Error getting picture", Toast.LENGTH_SHORT).show();
@@ -179,9 +227,10 @@ public class MainActivity extends ActionBarActivity
                     }
                     else
                     {
+                        ImageView imgView = new ImageView(this);
                         imgView.setImageBitmap(bm);
                         imgView.setPadding(5, 0, 5, 5);
-                        imgView.setOnClickListener(new ImageListener(bm));
+                        imgView.setOnClickListener(new ImageListener(photoPath));
                         imageLayout.addView(imgView);
                     }
                 }
@@ -258,18 +307,18 @@ public class MainActivity extends ActionBarActivity
 
     public class ImageListener implements OnClickListener
     {
-        Bitmap mBitmap;
+        String bitmapPath;
 
-        public ImageListener(Bitmap b)
+        public ImageListener(String pathToBmp)
         {
-            mBitmap = b;
+            bitmapPath = pathToBmp;
         }
 
         @Override
         public void onClick(View v)
         {
             Intent i = new Intent(v.getContext(), PictureActivity.class);
-            i.putExtra("pic", mBitmap);
+            i.putExtra("pic", bitmapPath);
             startActivity(i);
         }
     }
