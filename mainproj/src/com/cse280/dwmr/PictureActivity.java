@@ -9,7 +9,6 @@ import android.widget.Toast;
 
 public class PictureActivity extends FullscreenActivity
 {
-    // TODO: replace loading image
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
