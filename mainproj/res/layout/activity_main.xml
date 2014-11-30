@@ -46,13 +46,21 @@
             android:textSize="12sp" />
 
         <Button
+            android:id="@+id/btClearCarLoc"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Clear Ride Location"
+            android:textSize="12sp" />
+
+        <Button
             android:id="@+id/btFindCar"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Where&apos;s My Ride?"
             android:textSize="12sp" />
-
+        
         <Button
             android:id="@+id/btNotes"
             android:layout_width="wrap_content"

@@ -41,6 +41,8 @@ public class MainActivity extends ActionBarActivity
         Button notes = (Button) findViewById(R.id.btNotes);
         Button findcar = (Button) findViewById(R.id.btFindCar);
         Button pic = (Button) findViewById(R.id.btTakePic);
+        Button clearloc = (Button) findViewById(R.id.btClearCarLoc);
+
         imageLayout = (LinearLayout) findViewById(R.id.imageLayout);
         gps = new GPSTracker(this);
 
@@ -75,8 +77,6 @@ public class MainActivity extends ActionBarActivity
                             .edit();
                     float latitude = (float) loc.getLatitude();
                     float longitude = (float) loc.getLongitude();
-                    latitude = 40;
-                    longitude = -81;
                     e.putFloat(Constants.LATITUDE_KEY, latitude);
                     e.putFloat(Constants.LONGITUDE_KEY, longitude);
                     map.clear();
@@ -132,6 +132,17 @@ public class MainActivity extends ActionBarActivity
                 startActivity(new Intent(MainActivity.this, NoteActivity.class));
             }
         });
+
+        clearloc.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                map.clear();
+                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().clear().commit();
+                Toast.makeText(MainActivity.this, "Ride location was cleared", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private boolean hasRideLocationStored(SharedPreferences sp)
@@ -184,20 +195,23 @@ public class MainActivity extends ActionBarActivity
     {
         if (hasFocus && triggerZoom)
         {
+            LatLng singlePos = null;
             triggerZoom = false;
             map.clear();
+            int locCode = 0;
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
             if (hasRideLocationStored(sp))
             {
+                ++locCode;
                 float lat = sp.getFloat(Constants.LATITUDE_KEY, 0.0f);
                 float lng = sp.getFloat(Constants.LONGITUDE_KEY, 0.0f);
-                LatLng pos = new LatLng((double) lat, (double) lng);
+                singlePos = new LatLng((double) lat, (double) lng);
 
-                map.addMarker(new MarkerOptions().title(Constants.MARKER_TITLE).position(pos).draggable(false));
-                builder.include(pos);
+                map.addMarker(new MarkerOptions().title(Constants.MARKER_TITLE).position(singlePos).draggable(false));
+                builder.include(singlePos);
             }
 
             Location loc = gps.getLocation();
@@ -205,16 +219,26 @@ public class MainActivity extends ActionBarActivity
                 gps.showSettingsAlert();
             else
             {
+                locCode += 2;
                 LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
                 builder.include(pos);
+                if (locCode == 2)
+                    singlePos = pos;
             }
 
-            // zoom to show ride and current position with 10% padding
-            View v = getFragmentManager().findFragmentById(R.id.map).getView();
-            int width = v.getMeasuredWidth();
-            int height = v.getMeasuredHeight();
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height,
-                    (int) (Math.min(width, height) * 0.10)));
+            if (locCode == 3)
+            {
+                // zoom to show ride and current position with 10% padding
+                View v = getFragmentManager().findFragmentById(R.id.map).getView();
+                int width = v.getMeasuredWidth();
+                int height = v.getMeasuredHeight();
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height,
+                        (int) (Math.min(width, height) * 0.10)));
+            }
+            else
+            {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(singlePos, 17.5f));
+            }
         }
 
         super.onWindowFocusChanged(hasFocus);
