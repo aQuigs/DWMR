@@ -22,9 +22,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-
 public class NoteActivity extends ActionBarActivity implements ActionBar.TabListener
 {
     SectionsPagerAdapter    mSectionsPagerAdapter;

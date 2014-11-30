@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -63,6 +64,8 @@ public class MainActivity extends ActionBarActivity
         map.getUiSettings().setTiltGesturesEnabled(false);
         map.getUiSettings().setScrollGesturesEnabled(true);
 
+        map.setOnMapLongClickListener(new DWMRClickListener());
+
         setloc.setOnClickListener(new OnClickListener()
         {
             @Override
@@ -70,19 +73,12 @@ public class MainActivity extends ActionBarActivity
             {
                 Location loc = gps.getLocation();
                 if (loc == null)
+                {
                     gps.showSettingsAlert();
+                }
                 else
                 {
-                    SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
-                            .edit();
-                    float latitude = (float) loc.getLatitude();
-                    float longitude = (float) loc.getLongitude();
-                    e.putFloat(Constants.LATITUDE_KEY, latitude);
-                    e.putFloat(Constants.LONGITUDE_KEY, longitude);
-                    map.clear();
-                    map.addMarker(new MarkerOptions().title(Constants.MARKER_TITLE).draggable(false)
-                            .position(new LatLng((double) latitude, (double) longitude)));
-                    e.commit();
+                    setRidePos((float) loc.getLatitude(), (float) loc.getLongitude());
                     Toast.makeText(v.getContext(), "Location stored", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -138,11 +134,25 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onClick(View v)
             {
+                // remove markers, images, ride location, and notes
                 map.clear();
+                imageLayout.removeAllViews();
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().clear().commit();
-                Toast.makeText(MainActivity.this, "Ride location was cleared", Toast.LENGTH_SHORT).show();
+                getSharedPreferences(Constants.NOTE_PREF, MODE_PRIVATE).edit().clear().commit();
+                Toast.makeText(MainActivity.this, "Ride location data was cleared", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setRidePos(float latitude, float longitude)
+    {
+        SharedPreferences.Editor e = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
+        e.putFloat(Constants.LATITUDE_KEY, latitude);
+        e.putFloat(Constants.LONGITUDE_KEY, longitude);
+        map.clear();
+        map.addMarker(new MarkerOptions().title(Constants.MARKER_TITLE).draggable(false)
+                .position(new LatLng((double) latitude, (double) longitude)));
+        e.commit();
     }
 
     private boolean hasRideLocationStored(SharedPreferences sp)
@@ -277,6 +287,16 @@ public class MainActivity extends ActionBarActivity
             Intent i = new Intent(v.getContext(), PictureActivity.class);
             i.putExtra("pic", mBitmap);
             startActivity(i);
+        }
+    }
+
+    public class DWMRClickListener implements OnMapLongClickListener
+    {
+        @Override
+        public void onMapLongClick(LatLng pos)
+        {
+            setRidePos((float) pos.latitude, (float) pos.longitude);
+            Toast.makeText(MainActivity.this, "Stored custom ride location", Toast.LENGTH_LONG).show();
         }
     }
 }

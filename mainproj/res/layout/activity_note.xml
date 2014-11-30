@@ -27,7 +27,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="left|bottom"
             android:layout_weight="1"
-            android:text="Delete This Note" />
+            android:text="Delete This Note"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/btSaveNotes"
@@ -35,7 +36,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_weight="1"
-            android:text="Save Notes" />
+            android:text="Save Notes"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/btAddNote"
@@ -43,7 +45,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="right|bottom"
             android:layout_weight="1"
-            android:text="Add A Note" />
+            android:text="Add A Note"
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
 </LinearLayout>

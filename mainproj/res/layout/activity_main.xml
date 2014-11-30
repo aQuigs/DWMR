@@ -31,42 +31,47 @@
 
         <Button
             android:id="@+id/btSetLoc"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Set Location"
+            android:textColor="#FFFFFF"
             android:textSize="12sp" />
 
         <Button
             android:id="@+id/btTakePic"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Camera"
+            android:textColor="#FFFFFF"
             android:textSize="12sp" />
 
         <Button
             android:id="@+id/btClearCarLoc"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Clear Ride Location"
+            android:textColor="#FFFFFF"
             android:textSize="12sp" />
 
         <Button
             android:id="@+id/btFindCar"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Where&apos;s My Ride?"
+            android:textColor="#FFFFFF"
             android:textSize="12sp" />
-        
+
         <Button
             android:id="@+id/btNotes"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Notes"
+            android:textColor="#FFFFFF"
             android:textSize="12sp" />
     </LinearLayout>
 
