@@ -2,13 +2,8 @@ package com.cse280.dwmr;
 
 import java.util.ArrayList;
 
-import com.google.android.gms.internal.cn;
-
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -17,7 +12,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBar.Tab;
 import android.support.v7.app.ActionBarActivity;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +21,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 
 public class NoteActivity extends ActionBarActivity implements ActionBar.TabListener
 {
@@ -88,7 +85,10 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
                 if (mSectionsPagerAdapter.count > 1)
                     deleteCurrentTab();
                 else
+                {
                     Toast.makeText(NoteActivity.this, "Cannot delete last note", Toast.LENGTH_LONG).show();
+                    frags.get(0).getEditText().setText("");
+                }
             }
         });
 

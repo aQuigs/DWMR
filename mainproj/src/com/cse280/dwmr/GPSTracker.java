@@ -137,7 +137,7 @@ public class GPSTracker extends Service implements LocationListener {
         // return longitude
         return longitude;
     }
-
+     
     /**
      * Function to check GPS/wifi enabled
      * @return boolean
@@ -170,7 +170,7 @@ public class GPSTracker extends Service implements LocationListener {
         // on pressing cancel button
         alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-            dialog.cancel();
+                dialog.cancel();
             }
         });
   

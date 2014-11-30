@@ -18,10 +18,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 public class MainActivity extends ActionBarActivity
 {
+    boolean      triggerZoom;
     LinearLayout imageLayout;
     GPSTracker   gps;
+    GoogleMap    map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -34,6 +43,23 @@ public class MainActivity extends ActionBarActivity
         Button pic = (Button) findViewById(R.id.btTakePic);
         imageLayout = (LinearLayout) findViewById(R.id.imageLayout);
         gps = new GPSTracker(this);
+
+        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
+        // set up map settings
+        map.setMyLocationEnabled(true);
+        map.setIndoorEnabled(true);
+        map.setBuildingsEnabled(true);
+
+        map.getUiSettings().setCompassEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map.getUiSettings().setZoomGesturesEnabled(true);
+        map.getUiSettings().setIndoorLevelPickerEnabled(true);
+
+        map.getUiSettings().setRotateGesturesEnabled(false);
+        map.getUiSettings().setTiltGesturesEnabled(false);
+        map.getUiSettings().setScrollGesturesEnabled(true);
 
         setloc.setOnClickListener(new OnClickListener()
         {
@@ -49,8 +75,13 @@ public class MainActivity extends ActionBarActivity
                             .edit();
                     float latitude = (float) loc.getLatitude();
                     float longitude = (float) loc.getLongitude();
-                    e.putFloat("latitude", latitude);
-                    e.putFloat("longitude", longitude);
+                    latitude = 40;
+                    longitude = -81;
+                    e.putFloat(Constants.LATITUDE_KEY, latitude);
+                    e.putFloat(Constants.LONGITUDE_KEY, longitude);
+                    map.clear();
+                    map.addMarker(new MarkerOptions().title(Constants.MARKER_TITLE).draggable(false)
+                            .position(new LatLng((double) latitude, (double) longitude)));
                     e.commit();
                     Toast.makeText(v.getContext(), "Location stored", Toast.LENGTH_SHORT).show();
                 }
@@ -63,13 +94,13 @@ public class MainActivity extends ActionBarActivity
             public void onClick(View v)
             {
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                if (sp.contains("longitude") && sp.contains("latitude"))
+                if (hasRideLocationStored(sp))
                 {
                     // provide default for legacy purposes (allows support for
                     // older versions of android) even though it will never be
                     // used
-                    float latitude = sp.getFloat("latitude", 0.0f);
-                    float longitude = sp.getFloat("longitude", 0.0f);
+                    float latitude = sp.getFloat(Constants.LATITUDE_KEY, 0.0f);
+                    float longitude = sp.getFloat(Constants.LONGITUDE_KEY, 0.0f);
                     String format = "google.navigation:q=" + latitude + "," + longitude + "&mode=w";
 
                     Uri uri = Uri.parse(format);
@@ -103,6 +134,11 @@ public class MainActivity extends ActionBarActivity
         });
     }
 
+    private boolean hasRideLocationStored(SharedPreferences sp)
+    {
+        return sp.contains("longitude") && sp.contains("latitude");
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent i)
     {
@@ -121,7 +157,7 @@ public class MainActivity extends ActionBarActivity
                     else
                     {
                         imgView.setImageBitmap(bm);
-                        imgView.setPadding(5, 5, 5, 5);
+                        imgView.setPadding(5, 0, 5, 5);
                         imgView.setOnClickListener(new ImageListener(bm));
                         imageLayout.addView(imgView);
                     }
@@ -137,18 +173,63 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    protected void onDestroy()
+    protected void onStop()
     {
         gps.stopUsingGPS();
+        super.onStop();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        if (hasFocus && triggerZoom)
+        {
+            triggerZoom = false;
+            map.clear();
+
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            if (hasRideLocationStored(sp))
+            {
+                float lat = sp.getFloat(Constants.LATITUDE_KEY, 0.0f);
+                float lng = sp.getFloat(Constants.LONGITUDE_KEY, 0.0f);
+                LatLng pos = new LatLng((double) lat, (double) lng);
+
+                map.addMarker(new MarkerOptions().title(Constants.MARKER_TITLE).position(pos).draggable(false));
+                builder.include(pos);
+            }
+
+            Location loc = gps.getLocation();
+            if (loc == null)
+                gps.showSettingsAlert();
+            else
+            {
+                LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
+                builder.include(pos);
+            }
+
+            // zoom to show ride and current position with 10% padding
+            View v = getFragmentManager().findFragmentById(R.id.map).getView();
+            int width = v.getMeasuredWidth();
+            int height = v.getMeasuredHeight();
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height,
+                    (int) (Math.min(width, height) * 0.10)));
+        }
+
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    protected void onStart()
+    {
+        triggerZoom = true;
+        super.onStart();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        // TODO implement this
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings)
         {
