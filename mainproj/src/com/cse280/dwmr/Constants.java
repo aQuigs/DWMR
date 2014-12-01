@@ -10,4 +10,5 @@ public final class Constants
     public static final String LONGITUDE_KEY       = "longitude";
     public static final String LATITUDE_KEY        = "latitude";
     public static final String MARKER_TITLE        = "My Ride";
+    public static final String IMAGE_COUNT_KEY     = "image count";
 }

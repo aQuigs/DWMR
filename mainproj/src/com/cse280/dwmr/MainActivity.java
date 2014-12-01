@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.games.multiplayer.Invitations.LoadInvitationsResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
@@ -38,11 +39,16 @@ public class MainActivity extends ActionBarActivity
     LinearLayout imageLayout;
     GPSTracker   gps;
     GoogleMap    map;
+    int          imageCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        setTitle("Dude, Where's Your Ride?");
+        imageCount = PreferenceManager.getDefaultSharedPreferences(this).getInt(Constants.IMAGE_COUNT_KEY, 0);
+
         setContentView(R.layout.activity_main);
         Button setloc = (Button) findViewById(R.id.btSetLoc);
         Button notes = (Button) findViewById(R.id.btNotes);
@@ -51,8 +57,9 @@ public class MainActivity extends ActionBarActivity
         Button clearloc = (Button) findViewById(R.id.btClearCarLoc);
 
         imageLayout = (LinearLayout) findViewById(R.id.imageLayout);
-        gps = new GPSTracker(this);
+        loadSavedImages();
 
+        gps = new GPSTracker(this);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
         // set up map settings
@@ -150,16 +157,25 @@ public class MainActivity extends ActionBarActivity
                 imageLayout.removeAllViews();
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().clear().commit();
                 getSharedPreferences(Constants.NOTE_PREF, MODE_PRIVATE).edit().clear().commit();
-                
+
                 File storageDir = getStorageDirectory();
                 String[] contents = storageDir.list();
                 for (String s : contents)
                     new File(storageDir, s).delete();
                 storageDir.delete();
-                
+                imageCount = 0;
+
                 Toast.makeText(MainActivity.this, "Ride location data was cleared", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    protected void loadSavedImages()
+    {
+        for (int i = 1; i <= imageCount; ++i)
+        {
+            addImage(getImageFileName(i).getAbsolutePath());
+        }
     }
 
     private void setRidePos(float latitude, float longitude)
@@ -177,21 +193,60 @@ public class MainActivity extends ActionBarActivity
     {
         return sp.contains("longitude") && sp.contains("latitude");
     }
-    
+
     private File getStorageDirectory()
     {
         File dir = new File(Environment.getExternalStorageDirectory(), "DWMR");
 
         if (!dir.exists())
             dir.mkdir();
-        
+
         return dir;
     }
 
     private File getImageFileName()
     {
-        String imageFileName = "RIDE_IMAGE_" + (imageLayout.getChildCount() + 1) + ".jpg";
+        String imageFileName = "RIDE_IMAGE_" + (imageCount + 1) + ".jpg";
         return new File(getStorageDirectory(), imageFileName);
+    }
+
+    private File getImageFileName(int id)
+    {
+        String imageFileName = "RIDE_IMAGE_" + id + ".jpg";
+        return new File(getStorageDirectory(), imageFileName);
+    }
+
+    protected void addImage(String photoPath)
+    {
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+
+        BitmapFactory.decodeFile(photoPath, bmOptions);
+
+        int w = bmOptions.outWidth;
+        int h = bmOptions.outHeight;
+
+        int scale = Math.min(w, h) / 150;
+
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scale;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bm = BitmapFactory.decodeFile(photoPath, bmOptions);
+
+        if (bm == null)
+        {
+            Toast.makeText(this, "Error getting picture", Toast.LENGTH_SHORT).show();
+            Log.e("DWMR", "Problem getting picture from camera result intent");
+        }
+        else
+        {
+            ImageView imgView = new ImageView(this);
+            imgView.setImageBitmap(bm);
+            imgView.setPadding(5, 0, 5, 5);
+            imgView.setOnClickListener(new ImageListener(photoPath));
+            imageLayout.addView(imgView);
+        }
     }
 
     @Override
@@ -202,37 +257,8 @@ public class MainActivity extends ActionBarActivity
             case Constants.TAKE_PICTURE:
                 if (resultCode == RESULT_OK)
                 {
-                    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-                    bmOptions.inJustDecodeBounds = true;
-                    
-                    String photoPath = getImageFileName().getAbsolutePath();
-                    
-                    BitmapFactory.decodeFile(photoPath, bmOptions);
-
-                    int w = bmOptions.outWidth;
-                    int h = bmOptions.outHeight;
-
-                    int scale = Math.min(w, h) / 150;
-
-                    bmOptions.inJustDecodeBounds = false;
-                    bmOptions.inSampleSize = scale;
-                    bmOptions.inPurgeable = true;
-
-                    Bitmap bm = BitmapFactory.decodeFile(photoPath, bmOptions);
-
-                    if (bm == null)
-                    {
-                        Toast.makeText(this, "Error getting picture", Toast.LENGTH_SHORT).show();
-                        Log.e("DWMR", "Problem getting picture from camera result intent");
-                    }
-                    else
-                    {
-                        ImageView imgView = new ImageView(this);
-                        imgView.setImageBitmap(bm);
-                        imgView.setPadding(5, 0, 5, 5);
-                        imgView.setOnClickListener(new ImageListener(photoPath));
-                        imageLayout.addView(imgView);
-                    }
+                    addImage(getImageFileName().getAbsolutePath());
+                    ++imageCount;
                 }
         }
     }
@@ -242,6 +268,14 @@ public class MainActivity extends ActionBarActivity
     {
         gps.stopUsingGPS();
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Constants.IMAGE_COUNT_KEY, imageCount)
+                .commit();
+        super.onDestroy();
     }
 
     @Override
