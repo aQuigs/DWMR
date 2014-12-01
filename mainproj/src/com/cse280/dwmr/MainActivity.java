@@ -180,7 +180,7 @@ public class MainActivity extends ActionBarActivity
     
     private File getStorageDirectory()
     {
-        File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/DWMR");
+        File dir = new File(Environment.getExternalStorageDirectory(), "DWMR");
 
         if (!dir.exists())
             dir.mkdir();
