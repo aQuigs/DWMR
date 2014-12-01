@@ -1,7 +1,6 @@
 package com.cse280.dwmr;
 
 import java.io.File;
-import java.io.IOException;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.android.gms.games.multiplayer.Invitations.LoadInvitationsResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
@@ -152,20 +150,42 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onClick(View v)
             {
-                // remove markers, images, ride location, notes, and images
-                map.clear();
-                imageLayout.removeAllViews();
-                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().clear().commit();
-                getSharedPreferences(Constants.NOTE_PREF, MODE_PRIVATE).edit().clear().commit();
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
 
-                File storageDir = getStorageDirectory();
-                String[] contents = storageDir.list();
-                for (String s : contents)
-                    new File(storageDir, s).delete();
-                storageDir.delete();
-                imageCount = 0;
+                alertDialog.setTitle("Clear Ride Location");
+                alertDialog.setMessage("Are you sure you want to clear all ride location data?");
 
-                Toast.makeText(MainActivity.this, "Ride location data was cleared", Toast.LENGTH_SHORT).show();
+                alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        // remove markers, images, ride location, notes, and
+                        // images
+                        map.clear();
+                        imageLayout.removeAllViews();
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().clear().commit();
+                        getSharedPreferences(Constants.NOTE_PREF, MODE_PRIVATE).edit().clear().commit();
+
+                        File storageDir = getStorageDirectory();
+                        String[] contents = storageDir.list();
+                        for (String s : contents)
+                            new File(storageDir, s).delete();
+                        storageDir.delete();
+                        imageCount = 0;
+
+                        Toast.makeText(MainActivity.this, "Ride location data was cleared", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        dialog.cancel();
+                    }
+                });
+
+                alertDialog.show();
             }
         });
     }
@@ -243,7 +263,7 @@ public class MainActivity extends ActionBarActivity
         {
             ImageView imgView = new ImageView(this);
             imgView.setImageBitmap(bm);
-            imgView.setPadding(5, 0, 5, 5);
+            imgView.setPadding(2, 0, 2, 5);
             imgView.setOnClickListener(new ImageListener(photoPath));
             imageLayout.addView(imgView);
         }
