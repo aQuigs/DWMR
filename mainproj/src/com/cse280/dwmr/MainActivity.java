@@ -284,18 +284,12 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    protected void onStop()
-    {
-        gps.stopUsingGPS();
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy()
+    protected void onPause()
     {
         PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Constants.IMAGE_COUNT_KEY, imageCount)
                 .commit();
-        super.onDestroy();
+        gps.stopUsingGPS();
+        super.onPause();
     }
 
     @Override
