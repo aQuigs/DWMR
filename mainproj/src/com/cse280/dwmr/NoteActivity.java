@@ -34,6 +34,8 @@ public class NoteActivity extends ActionBarActivity implements ActionBar.TabList
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
+        
+        setTitle("Enter some notes");
 
         Button add = (Button) findViewById(R.id.btAddNote);
         Button sav = (Button) findViewById(R.id.btSaveNotes);
