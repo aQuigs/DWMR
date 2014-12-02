@@ -343,7 +343,7 @@ public class MainActivity extends ActionBarActivity
                 map.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height,
                         (int) (Math.min(width, height) * 0.10)));
             }
-            else if (singlePos != null);
+            else if (singlePos != null)
             {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(singlePos, 17.5f));
             }
